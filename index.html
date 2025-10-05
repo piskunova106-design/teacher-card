@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>С ДНЁМ УЧИТЕЛЯ!</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const fontSize = 20;
+const columns = Math.floor(canvas.width / fontSize);
+
+const message = "С ДНЁМ УЧИТЕЛЯ, ДАРЬЯ АЛЕКСАНДРОВНА!";
+const letters = message.split("");
+
+// Падающие буквы
+let drops = Array(columns).fill(0);
+
+// Фразы
+const phrases = [
+   "вы лучший преподаватель",
+   "спасибо за знания",
+   "улыбок и перманентного счастья",
+   "спасибо за вдохновение",
+   "спасибо за ваше чувство юмора",
+   "ваш труд бесценен",
+   "гармонии во всём",
+   "крепкого здоровья",
+   "с вами учиться легко и увлекательно",
+   "из обезьяны человека делает не только труд, но и вы"
+];
+
+let floatingPhrases = [];
+let phraseIndex = 0;
+
+// Объект фразы
+class FloatingPhrase {
+  constructor(text, x, y) {
+    this.text = text;
+    this.x = x;
+    this.y = y;
+    this.start = Date.now();
+    this.duration = 3000; // 3 сек
+  }
+
+  draw(ctx) {
+    let elapsed = Date.now() - this.start;
+    if (elapsed > this.duration) return false;
+
+    let alpha = 1 - elapsed / this.duration;
+    ctx.font = "20px monospace";
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fillText(this.text, this.x, this.y);
+    return true;
+  }
+}
+
+// Рисуем падающие буквы
+function drawMatrix() {
+  ctx.fillStyle = "rgba(0,0,0,0.1)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "rgb(255,105,180)";
+  ctx.font = fontSize + "px monospace";
+
+  for (let i = 0; i < drops.length; i++) {
+    let text = letters[Math.floor(Math.random() * letters.length)];
+    let x = i * fontSize;
+    let y = drops[i] * fontSize;
+
+    ctx.fillText(text, x, y);
+
+    if (y > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+    drops[i]++;
+  }
+}
+
+// Основной цикл
+function animate() {
+  drawMatrix();
+
+  // Рисуем фразы
+  floatingPhrases = floatingPhrases.filter(p => p.draw(ctx));
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// При клике — новая фраза
+canvas.addEventListener("click", (e) => {
+  let phrase = phrases[phraseIndex];
+  floatingPhrases.push(new FloatingPhrase(phrase, e.clientX, e.clientY));
+  phraseIndex = (phraseIndex + 1) % phrases.length;
+});
+
+// Перерисовка при изменении окна
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
